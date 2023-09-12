@@ -1,2 +1,3 @@
 # tic-tac-toe
-Tic Tac Toe game implemented using java.
+* A command line version of tic tac toe game
+* Implemented using java language
