@@ -50,8 +50,7 @@ public class Main{
     }
 
     public static List<Integer> available_moves(char[] board){
-        // function for checking available moves in the board
-        
+
         List<Integer> moves = new ArrayList<>();
 
         for(int i = 1; i < 10; i++){
@@ -65,7 +64,7 @@ public class Main{
     }
 
     public static int num_empty_squares(char[] board){
-        // function for checking the number of empty squares in the board
+
         return (available_moves(board).size());
     }
 
@@ -101,25 +100,37 @@ public class Main{
             printBoard(board);
             // gameOver = true;
             System.out.print("Player " + player + " enter: ");
-            int position = scanner.nextInt();
-
-            if(board[position] != 'X' && board[position] != 'O'){
-                board[position] = player;
-                gameOver = winner(board, player);
-                if(gameOver){
-                    System.out.println("Player " + player + " has won!");
-                }
-                else{
-                    if(player == 'X'){
-                        player = 'O';
-                    }else{
-                        player = 'X';
+            
+            // try and catch block will starts here
+            
+            try{
+                int position = scanner.nextInt();
+                if(board[position] != 'X' && board[position] != 'O'){
+                    board[position] = player;
+                    gameOver = winner(board, player);
+                    if(gameOver){
+                        System.out.println("Player " + player + " has won!");
                     }
-                    
+                    else{
+                        if(player == 'X'){
+                            player = 'O';
+                        }else{
+                            player = 'X';
+                        }
+                        
+                    }
+                }                
+                else{
+                    System.out.println("Invalid Move. Try again!");
                 }
-            }
-            else{
-                System.out.println("Invalid Move. Try again!");
+            }catch(ArrayIndexOutOfBoundsException e1){
+                // handling array index out of bound case
+                System.out.println("Invalid input. Please enter a number between 1 and 9.");
+
+            }catch(InputMismatchException e2){
+                // handling input mismatch exception
+                System.out.println("Invalid input. Please enter a number between 1 and 9.");
+
             }
         
         }
@@ -127,8 +138,10 @@ public class Main{
         printBoard(board);
 
        if(!gameOver){
+        
         System.out.println("It's tie");
-       }
+       
+        }
 
     }
 
