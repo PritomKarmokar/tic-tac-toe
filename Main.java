@@ -1,60 +1,51 @@
+/******************** Importing Essential Libraries ************************/
 import java.util.ArrayList;
+import java.util.InputMismatchException;
 import java.util.List;
+import java.util.Random;
 import java.util.Scanner;
 
-public class Main{
+/******************** Creating TicTacToe class ************************/
+class TicTacToe{
 
-    public static void printBoard(char[] board){
-        // function for printing the current board
+    char[] board = new char[10];
+    char winner;
+    
+    // constructor
 
+    public TicTacToe(){
+        // Initializing the board
+        for(int i = 0; i < 10; i++){
+            char ch = Integer.toString(i).charAt(0); // converting the interger number into character
+            this.board[i] = ch; 
+        }
+    }
+    
+    // function for printing the current board
+
+    public void printBoard(){
+        
         for(int i = 1; i < 10; i++){
-            if(i == 1 || i == 4 || i == 7) System.out.print("| ");
+            if(i == 1 || i == 4 || i == 7) System.out.print("\t\t\t| ");
 
-            System.out.print(board[i] + " | ");
+            System.out.print(this.board[i] + " | ");
 
             if(i % 3 == 0 && i != 9)  {
-                System.out.print("\n --- --- ---\n");
+                System.out.print("\n\t\t\t --- --- ---\n");
             }
         }
 
         System.out.println("\n");      
     }
 
-    public static boolean winner(char[] board,char letter){
+    // function for checking current available moves
 
-        // checking all rows
-        if(board[1] == letter && board[2] == letter && board[3] == letter) 
-            return true;
-        else if(board[4] == letter && board[5] == letter && board[6] == letter) 
-            return true;
-        else if(board[7] == letter && board[8] == letter && board[9] == letter) 
-            return true;
-
-        
-        // checking all columns
-        if(board[1] == letter && board[4] == letter && board[7] == letter) 
-            return true;
-        else if(board[2] == letter && board[5] == letter && board[8] == letter) 
-            return true;
-        else if(board[3] == letter && board[6] == letter && board[9] == letter) 
-            return true;
-
-        // checking the diagonals
-        if(board[1] == letter && board[5] == letter && board[9] == letter) 
-           return true;
-        else if(board[3] == letter && board[5] == letter && board[7] == letter) 
-           return true;
-
-        // if no match return false
-        return false;
-    }
-
-    public static List<Integer> available_moves(char[] board){
+    public List<Integer> available_moves(){
 
         List<Integer> moves = new ArrayList<>();
 
         for(int i = 1; i < 10; i++){
-            char ch = (char) board[i];
+            char ch = (char) this.board[i];
             if(ch != 'X' && ch != 'O') {
                 moves.add(i);
             }
@@ -63,86 +54,204 @@ public class Main{
         return moves;
     }
 
-    public static int num_empty_squares(char[] board){
+    // function for checking num of empty squares
 
-        return (available_moves(board).size());
+    public int num_empty_squares(){
+
+        return (available_moves().size());
     }
 
+    public boolean isWinner(char letter){
+
+        // checking all rows
+        if(this.board[1] == letter && this.board[2] == letter && this.board[3] == letter) 
+            return true;
+        else if(this.board[4] == letter && this.board[5] == letter && this.board[6] == letter) 
+            return true;
+        else if(this.board[7] == letter && this.board[8] == letter && this.board[9] == letter) 
+            return true;
+
+        
+        // checking all columns
+        if(this.board[1] == letter && this.board[4] == letter && this.board[7] == letter) 
+            return true;
+        else if(this.board[2] == letter && this.board[5] == letter && this.board[8] == letter) 
+            return true;
+        else if(this.board[3] == letter && this.board[6] == letter && this.board[9] == letter) 
+            return true;
+
+        // checking the diagonals
+        if(this.board[1] == letter && this.board[5] == letter && this.board[9] == letter) 
+           return true;
+        else if(this.board[3] == letter && this.board[5] == letter && this.board[7] == letter) 
+           return true;
+
+        // if no match return false
+        return false;
+    }
+
+}
+
+/******************** Creating Player class ************************/
+abstract class Player{
+    char letter;
+
+    public Player(char letter){
+        this.letter = letter;
+    }
+    public abstract int getMove(TicTacToe game);
+}
+
+/******************** Creating Human Player class which is child of Player class ************************/
+class HumanPlayer extends Player{
+
+    // constructor
+    public HumanPlayer(char letter){
+        super(letter);
+    }
+
+    // function for making a move
+    public int getMove(TicTacToe game){
+ 
+        Scanner scanner = new Scanner(System.in);
+        boolean validSquare = false;
+        int position = 0;
+
+        while(!validSquare){
+
+            System.out.print("Your turn. Input move (1-9): ");
+
+            try{
+                position = scanner.nextInt();
+
+                if(game.board[position] != 'X' && game.board[position] != 'O' /*&& game.num_empty_squares() > 0/* */){
+
+                    game.board[position] = this.letter; 
+                    validSquare = true;
+                    System.out.println();  // printing new line
+
+                } else{
+                    System.out.println("\nInvalid Square. Try again!\n");
+                }
+                
+            }catch(ArrayIndexOutOfBoundsException e1){
+                // handling array of index out of bound case
+                System.out.println("\nInvalid Input. Please enter a number between 1 and 9\n");
+
+            }catch(InputMismatchException e2){
+                // handling input mismatch exception
+                System.out.println("\nInvalid Input. Please enter a number between 1 and 9\n");
+            }
+        }
+        return position;
+    }
+}
+
+/******************** Creating Computer Player class which is child of Player class ************************/
+class ComputerPlayer extends Player{
+
+    // constructor
+    public ComputerPlayer(char letter){
+        super(letter);
+    }
+
+    // function for making a move
+    public int getMove(TicTacToe game){
+        
+        List<Integer> moves = game.available_moves();
+        Random rand = new Random();
+        
+        int index = rand.nextInt(moves.size());
+        int position = moves.get(index);
+        game.board[position] = this.letter;
+
+        return position;
+    }
+}
+
+/******************** Main class ************************/
+public class Main{
     public static void main(String[] args) {
 
-        char[] board = new char[10];
-
-        for(int i = 0; i < board.length; i++){
-            board[i] = Integer.toString(i).charAt(0); // converting the interger number into character
-        }
-
-        // printBoard(board);
+        TicTacToe t = new TicTacToe();
+        
+        System.out.println("\nLet's play the famous tic-tac-toe game with me!\n");
+               
         Scanner scanner = new Scanner(System.in);
-        System.out.print("Which character you want to choose? ('X' or 'O') : ");
-        char player = scanner.next().charAt(0);
-        System.out.println("");
+        boolean playerInput = false;
+        char letter = 'Y';
 
-        char otherPlayer;
-        if(player == 'X'){
-            otherPlayer = 'O';
+        // choosing the correct character from the user
+        while(!playerInput){
+
+            System.out.print("Which character you want to choose? ('X' or 'O') : ");
+            letter = scanner.next().charAt(0);
+
+            if(letter != 'X' && letter != 'O'){
+                System.out.println("\nInvalid choice. Please enter 'X' or 'O'.\n");    
+            }
+            else{
+                playerInput = true;
+            }
         }
-        else otherPlayer = 'X';
+        System.out.println("");
+        
+        HumanPlayer human = new HumanPlayer(letter);
 
-        System.out.println("Okay. Then other player chooses character " + otherPlayer);
-        System.out.println();
+        if(letter == 'X'){
+            letter = 'O';
+        }
+        else letter = 'X';
+
+        ComputerPlayer computer = new ComputerPlayer(letter);
+
+        System.out.println("Okay! then I am choosing the other character : " + computer.letter+ "\n");
+        
 
         System.out.println("Now, let's start the game!");
         System.out.println();
 
         boolean gameOver = false;
+        boolean flag = true;
 
-        while(!gameOver && num_empty_squares(board) > 0){
-            printBoard(board);
-            // gameOver = true;
-            System.out.print("Player " + player + " enter: ");
-            
-            // try and catch block will starts here
-            
-            try{
-                int position = scanner.nextInt();
-                if(board[position] != 'X' && board[position] != 'O'){
-                    board[position] = player;
-                    gameOver = winner(board, player);
-                    if(gameOver){
-                        System.out.println("Player " + player + " has won!");
-                    }
-                    else{
-                        if(player == 'X'){
-                            player = 'O';
-                        }else{
-                            player = 'X';
-                        }
-                        
-                    }
-                }                
-                else{
-                    System.out.println("Invalid Move. Try again!");
+        while(!gameOver && t.num_empty_squares() > 0){
+
+            t.printBoard();
+
+            int position;
+
+            if(flag){
+
+                position = human.getMove(t);
+
+                System.out.println("Human player makes a move to position " + position + "\n");
+
+                if(t.isWinner(human.letter)){
+                    t.printBoard();
+                    gameOver = true;
+                    System.out.println("Congratulations! You have won the game!! \n");           
                 }
-            }catch(ArrayIndexOutOfBoundsException e1){
-                // handling array index out of bound case
-                System.out.println("Invalid input. Please enter a number between 1 and 9.");
-
-            }catch(InputMismatchException e2){
-                // handling input mismatch exception
-                System.out.println("Invalid input. Please enter a number between 1 and 9.");
+                flag = false;
 
             }
-        
+            else{
+
+                position = computer.getMove(t);
+                System.out.println("I am choosing position " + position + "\n");
+
+                if(t.isWinner(computer.letter)){
+                    t.printBoard();
+                    gameOver = true;
+                    System.out.println("I have won the game!! ha ha ha!! \n");
+                }
+                flag = true;
+            }
+            
         }
 
-        printBoard(board);
-
-       if(!gameOver){
-        
-        System.out.println("It's tie");
-       
+        if(gameOver == false){
+            System.out.println("It's a Tie \n");
         }
-
     }
 
 }
